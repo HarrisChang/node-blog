@@ -1,11 +1,33 @@
 const querystring = require('querystring')
 const handleUserRouter = require('./src/router/user')
 
+const getPostData = req => {
+    const promise = new Promise((resolve, reject) => {
+        if(req.method !== 'POST' || req.headers['content-type'] !== 'application/json'){
+            resolve({})
+            return
+        }
+        let postData = ''
+        req.on('data', chunk => {
+            postData += chunk.toString()
+        })
+        req.on('end', () => {
+            if(!postData){
+                resolve({})
+                return
+            }
+            resolve(
+                JSON.parse(postData)
+            )
+        })
+    })
+    return promise
+}
+
 const serverHandle = (req, res) => {
     // 设置返回格式 JSON
     res.setHeader('Content-type', 'application/json')
 
-    const method = req.method
     // 处理 path
     const url = req.url
     req.path = url.split('?')[0]
@@ -13,18 +35,24 @@ const serverHandle = (req, res) => {
     // 解析 query
     req.query = querystring.parse(url.split('?')[1])
 
-    let userRes = handleUserRouter(req, res)
-    if(userRes){
-        userRes.then(result => {
-            res.end(
-                JSON.stringify(result)
-            )
-        }).catch(err => {
-            res.writeHead(404, {'Content-type': 'text/plain'})
-            res.write('404 Not Found')
-            res.end()
-        })
-    }
+    getPostData(req)
+    .then(postData => {
+        req.body = postData
+
+        // 处理user路由
+        let userRes = handleUserRouter(req, res)
+        if(userRes){
+            userRes.then(result => {
+                res.end(
+                    JSON.stringify(result)
+                )
+            }).catch(err => {
+                res.writeHead(404, {'Content-type': 'text/plain'})
+                res.write('404 Not Found')
+                res.end()
+            })
+        }
+    })
 }
 
 module.exports = serverHandle
