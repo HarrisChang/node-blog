@@ -2,9 +2,9 @@ const { execSql } = require('../utils/db')
 
 const login = (username, password) => {
     if(username === 'harris' && password === '123456'){
-        return true
+        return Promise.resolve(true)
     }
-    return false
+    return Promise.resolve(false)
 }
 
 const checkLogin = (username, password) => {
