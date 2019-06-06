@@ -15,15 +15,16 @@ const serverHandle = (req, res) => {
 
     let userRes = handleUserRouter(req, res)
     if(userRes){
-        res.end(
-            JSON.stringify(userRes)
-        )
-        return
-    } 
-
-    res.writeHead(404, {'Content-type': 'text/plain'})
-    res.write('404 Not Found')
-    res.end()
+        userRes.then(result => {
+            res.end(
+                JSON.stringify(result)
+            )
+        }).catch(err => {
+            res.writeHead(404, {'Content-type': 'text/plain'})
+            res.write('404 Not Found')
+            res.end()
+        })
+    }
 }
 
 module.exports = serverHandle

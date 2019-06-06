@@ -11,12 +11,17 @@ const handleUserRouter = (req, res) => {
     }
     
     if(req.method === 'GET' && req.path === '/api/user/checkLogin'){
-        const checkLoginRes = checkLogin(req.query.username, req.query.password)
-        if(checkLoginRes){
-            return new SuccessModel('登录成功')
-        }else{
-            return new ErrorModel('登录失败')
-        }
+        return checkLogin(req.query.username, req.query.password).then(result => {
+            if(result[0].username){
+                return new SuccessModel({
+                    data: result[0]
+                })
+            }else{
+                return new ErrorModel('登录信息已失效')
+            }
+        }).catch(err => {
+            return new ErrorModel('登录信息已失效')
+        })
     }
 }
 
