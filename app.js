@@ -1,6 +1,13 @@
 const querystring = require('querystring')
 const handleUserRouter = require('./src/router/user')
 const handleBlogRouter = require('./src/router/blog')
+const SESSION_DATA = {}
+
+const getCookieExpires = () => {
+    const d = new Date()
+    d.setTime(d.getTime() + (24 * 60 * 60 * 1000))
+    return d.toGMTString()
+}
 
 const getPostData = req => {
     const promise = new Promise((resolve, reject) => {
@@ -49,6 +56,21 @@ const serverHandle = (req, res) => {
         req.cookie[key] = val
     })
 
+    // 解析 session
+    let needSetCookie = false
+    let userId = req.cookie.userid
+    if(userId){
+        if(!SESSION_DATA[userId]){
+            SESSION_DATA[userId] = {}
+        }
+    }else{
+        needSetCookie = true
+        userId = `${Date.now()}_${Math.random()}`
+        SESSION_DATA[userId] = {}
+    }
+    req.session = SESSION_DATA[userId]
+
+
     getPostData(req)
     .then(postData => {
         req.body = postData
@@ -71,6 +93,9 @@ const serverHandle = (req, res) => {
         let userRes = handleUserRouter(req, res)
         if(userRes){
             userRes.then(result => {
+                if(needSetCookie){
+                    res.setHeader('Set-Cookie', `userid=${userId}; path=/; httpOnly; expires=${getCookieExpires()}`)
+                }
                 res.end(
                     JSON.stringify(result)
                 )
