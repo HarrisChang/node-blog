@@ -1,8 +1,9 @@
-const { execSql } = require('../db/mysql')
+const { execSql, escape } = require('../db/mysql')
 
 const login = (username, password) => {
-
-    let sql = `select username, realname from users where username='${username}' and password='${password}'`
+    username = escape(username)
+    password = escape(password)
+    let sql = `select username, realname from users where username=${username} and password=${password}`
     return execSql(sql).then(data => {
         return data[0] || {}
     })
