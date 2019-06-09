@@ -1,5 +1,5 @@
 const mysql = require('mysql')
-const { MYSQL_CONF } = require('../conf/mysql')
+const { MYSQL_CONF } = require('../conf/db')
 
 const connection = mysql.createConnection(MYSQL_CONF)
 const execSql = (sql) => {

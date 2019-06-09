@@ -1,4 +1,4 @@
-const { execSql } = require('../utils/db')
+const { execSql } = require('../db/mysql')
 
 const getList = (pageIndex, pageSize, keyword, userId) => {
     let sql = `select * from blogs where 1=1 `

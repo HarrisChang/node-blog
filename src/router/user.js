@@ -1,5 +1,6 @@
 const { login, checkLogin } = require('../controller/user')
 const { SuccessModel, ErrorModel } = require('../model/resModel')
+const { setRedis } = require('../db/redis')
 
 const handleUserRouter = (req, res) => {
     if(req.method === 'GET' && req.path === '/api/user/login'){
@@ -9,6 +10,8 @@ const handleUserRouter = (req, res) => {
                 // 操作cookie
                 req.session.username = data.username
                 req.session.realname = data.realname
+                // 同步到 redis中
+                setRedis(req.sessionId, req.session)
                 return new SuccessModel('登录成功')
             }else{
                 return new ErrorModel('用户名或密码错误')

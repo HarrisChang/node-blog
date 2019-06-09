@@ -1,4 +1,4 @@
-const { execSql } = require('../utils/db')
+const { execSql } = require('../db/mysql')
 
 const login = (username, password) => {
 
